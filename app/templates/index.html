@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Try-On</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.2/dist/tailwind.min.css" rel="stylesheet">
+    <script>
+        function updateShirtSelection() {
+            var shirtSelect = document.getElementById('shirt');
+            var selectedShirtIndex = shirtSelect.selectedIndex; // Get index of selected shirt
+            var videoFeed = document.getElementById('video-feed');
+
+            // Update the shirt index in the URL
+            videoFeed.src = `/stream_video_feed?shirt_index=${selectedShirtIndex}`;
+        }
+    </script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-4xl p-6 bg-gray-800 rounded-lg shadow-lg flex flex-col items-center space-y-6">
+        <h1 class="text-3xl font-bold text-teal-300">Virtual Try-On</h1>
+        
+        <form action="{{ url_for('routes.index') }}" method="post" onsubmit="updateShirtSelection()">
+            <div class="relative">
+                <label for="shirt" class="block text-lg font-semibold mb-2 text-teal-400">Select a Shirt:</label>
+                <select name="shirt" id="shirt" onchange="updateShirtSelection()"
+                    class="block appearance-none w-full bg-gray-700 border border-teal-500 text-white py-2 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-300">
+                    {% for shirt in shirts %}
+                        <option value="{{ loop.index0 }}" {% if loop.index0 == selected_shirt_index %}selected{% endif %}>
+                            <img src="{{ url_for('static', filename='uploads/' ~ shirt) }}" alt="{{ shirt }}" class="w-24 h-24 object-cover">
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <button type="submit" class="mt-4 bg-teal-500 hover:bg-teal-600 text-white py-2 px-4 rounded-md">
+                Select
+            </button>
+        </form>
+
+        <form action="{{ url_for('routes.upload_shirt') }}" method="post" enctype="multipart/form-data">
+            <div class="relative mt-6">
+                <label for="file" class="block text-lg font-semibold mb-2 text-teal-400">Upload a Shirt Image:</label>
+                <input type="file" name="file" id="file" accept="image/png"
+                    class="block w-full text-white bg-gray-700 border border-teal-500 py-2 px-3 rounded-md file:bg-teal-600 file:text-white file:py-1 file:px-3 file:rounded-md hover:file:bg-teal-500">
+                <button type="submit" class="mt-4 bg-teal-500 hover:bg-teal-600 text-white py-2 px-4 rounded-md">
+                    Upload
+                </button>
+            </div>
+        </form>
+
+        <img id="video-feed" src="{{ url_for('routes.stream_video_feed_route') }}" alt="Video Feed" class="w-full max-w-4xl h-auto mt-6 rounded-lg shadow-lg">
+    </div>
+</body>
+</html>
